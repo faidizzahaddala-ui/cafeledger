@@ -6,6 +6,7 @@ import { insertTransaksi } from "@/utils/supabase";
 
 // ── Menu Data ─────────────────────────────────────────────────────────────────
 type Category = "Semua" | "Minuman Panas" | "Minuman Dingin" | "Makanan";
+type PaymentMethod = "Tunai" | "QRIS" | "Kartu";
 
 interface MenuItem {
   id: number;
@@ -57,6 +58,12 @@ export default function PosPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
+  // ── Payment States ──────────────────────────────────────────────────────────
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod]       = useState<PaymentMethod>("Tunai");
+  const [amountTendered, setAmountTendered]     = useState<number>(0);
+  const [lastChange, setLastChange]             = useState<number>(0);
+
   // ── Filtered menu ──────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     return menuItems.filter((item) => {
@@ -90,14 +97,23 @@ export default function PosPage() {
   const cartQty   = (id: number) => cart.find((c) => c.id === id)?.qty ?? 0;
 
   // ── Pay → INSERT ke Supabase ──────────────────────────────────────────────
-  const handlePay = async () => {
+  const openPaymentModal = () => {
     if (cart.length === 0) return;
+    setPaymentModalOpen(true);
+    setPaymentMethod("Tunai");
+    setAmountTendered(total); // Default to exact amount
+  };
+
+  const processPayment = async () => {
+    if (cart.length === 0) return;
+    if (paymentMethod === "Tunai" && amountTendered < total) return;
+    
     setPaying(true);
     setPayError(null);
 
     const description = cart
       .map((c) => `${c.qty}x ${c.name}`)
-      .join(", ");
+      .join(", ") + ` [Via: ${paymentMethod}]`;
 
     const result = await insertTransaksi({
       type:     "Pemasukan",
@@ -114,7 +130,9 @@ export default function PosPage() {
     }
 
     setLastTotal(total);
+    setLastChange(paymentMethod === "Tunai" ? amountTendered - total : 0);
     setCart([]);
+    setPaymentModalOpen(false);
     setMobileCartOpen(false);
     setSuccessModal(true);
   };
@@ -246,8 +264,8 @@ export default function PosPage() {
 
         <button
           id="btn-bayar"
-          onClick={handlePay}
-          disabled={cart.length === 0 || paying}
+          onClick={openPaymentModal}
+          disabled={cart.length === 0}
           className="w-full py-3.5 lg:py-4 rounded-2xl text-sm lg:text-base font-bold transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 active:scale-[0.98]"
           style={{
             background: cart.length > 0
@@ -258,12 +276,7 @@ export default function PosPage() {
           }}
         >
           {paying ? (
-            <>
-              <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-              </svg>
-              Memproses…
-            </>
+            "Memproses..."
           ) : (
             <>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -511,6 +524,120 @@ export default function PosPage() {
         </div>
       )}
 
+      {/* ══ Payment Modal ══ */}
+      {paymentModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+          style={{ background: "rgba(5,2,1,0.85)", backdropFilter: "blur(10px)" }}
+          onClick={(e) => (e.target as HTMLElement) === e.currentTarget && setPaymentModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl flex flex-col p-6 animate-fade-up glass-panel"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-5">
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">Proses Pembayaran</h3>
+              <button
+                onClick={() => setPaymentModalOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Total */}
+            <div className="flex flex-col items-center justify-center py-4 mb-5 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+              <p className="text-[12px] text-[var(--text-muted)] uppercase tracking-widest font-semibold mb-1">Total Tagihan</p>
+              <p className="text-3xl font-bold gradient-text">{formatRp(total)}</p>
+            </div>
+
+            {/* Payment Method */}
+            <div className="mb-5">
+              <p className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">Metode Pembayaran</p>
+              <div className="grid grid-cols-3 gap-3">
+                {(["Tunai", "QRIS", "Kartu"] as PaymentMethod[]).map((method) => (
+                  <button
+                    key={method}
+                    onClick={() => {
+                      setPaymentMethod(method);
+                      if (method !== "Tunai") setAmountTendered(total);
+                    }}
+                    className={`py-3 rounded-xl text-sm font-semibold transition-all border ${
+                      paymentMethod === method
+                        ? "bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-[0_0_15px_rgba(217,119,6,0.2)]"
+                        : "bg-white/[0.03] border-white/[0.05] text-[var(--text-muted)] hover:bg-white/[0.06]"
+                    }`}
+                  >
+                    {method}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Calculator (Only for Cash) */}
+            {paymentMethod === "Tunai" && (
+              <div className="mb-6 animate-fade-in space-y-4">
+                <div>
+                  <p className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-2">Uang Diterima</p>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-[var(--text-muted)]">Rp</span>
+                    <input
+                      type="number"
+                      value={amountTendered || ""}
+                      onChange={(e) => setAmountTendered(Number(e.target.value))}
+                      className="w-full pl-12 pr-4 py-3 bg-white/[0.02] border border-white/[0.1] rounded-xl text-lg font-bold focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.05] transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button onClick={() => setAmountTendered(total)} className="py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] text-xs font-semibold text-[var(--text-primary)] transition-colors">Uang Pas</button>
+                  <button onClick={() => setAmountTendered(50000)} className="py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] text-xs font-semibold text-[var(--text-primary)] transition-colors">50.000</button>
+                  <button onClick={() => setAmountTendered(100000)} className="py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] text-xs font-semibold text-[var(--text-primary)] transition-colors">100.000</button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                  <span className="text-sm text-[var(--text-primary)] font-medium">Kembalian</span>
+                  <span className={`text-lg font-bold ${amountTendered >= total ? "text-emerald-400" : "text-red-400"}`}>
+                    {amountTendered >= total ? formatRp(amountTendered - total) : "Kurang"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Error */}
+            {payError && (
+              <div className="mb-4 flex items-start gap-2 px-3 py-2 rounded-xl text-[11px] text-red-300 animate-fade-in bg-red-500/10 border border-red-500/20">
+                <svg className="mt-0.5 flex-shrink-0" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                {payError}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setPaymentModalOpen(false)}
+                className="px-5 py-3.5 rounded-xl text-sm font-semibold transition-colors bg-white/[0.03] hover:bg-white/[0.06] text-[var(--text-primary)]"
+              >
+                Batal
+              </button>
+              <button
+                onClick={processPayment}
+                disabled={paying || (paymentMethod === "Tunai" && amountTendered < total)}
+                className="flex-1 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 active:scale-95 text-white"
+                style={{ background: "linear-gradient(135deg, #8B4513, #C8883C)", boxShadow: "0 8px 24px rgba(139,69,19,0.4)" }}
+              >
+                {paying ? "Memproses..." : "Konfirmasi Pembayaran"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ══ Success Modal ══ */}
       {successModal && (
         <div
@@ -558,9 +685,15 @@ export default function PosPage() {
                 <span className="text-[var(--text-primary)] font-semibold">Sales</span>
               </div>
               <div className="flex justify-between text-xs mt-1">
-                <span className="text-[var(--text-muted)]">Total</span>
+                <span className="text-[var(--text-muted)]">Total Tagihan</span>
                 <span className="font-bold" style={{ color: "var(--gold)" }}>{formatRp(lastTotal)}</span>
               </div>
+              {lastChange > 0 && (
+                <div className="flex justify-between text-xs mt-2 pt-2 border-t border-white/[0.06]">
+                  <span className="text-[var(--text-muted)] font-medium">Kembalian</span>
+                  <span className="font-bold text-amber-400 text-sm">{formatRp(lastChange)}</span>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 w-full">
