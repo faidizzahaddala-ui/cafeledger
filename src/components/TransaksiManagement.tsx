@@ -338,8 +338,7 @@ export default function TransaksiManagement() {
                 {!loading && filtered.map((trx) => (
                   <tr
                     key={trx.id}
-                    className="group transition-colors duration-150 hover:bg-white/[0.025]"
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                    className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.04] transition-all duration-300 group hover:-translate-y-[2px] relative z-10"
                   >
                     {/* Tanggal ← created_at */}
                     <td className="px-5 py-3.5 whitespace-nowrap">

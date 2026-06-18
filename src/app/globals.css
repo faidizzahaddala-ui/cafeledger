@@ -43,14 +43,51 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--gold);
-  border-radius: 3px;
+  background: rgba(200, 136, 60, 0.2);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-light);
+  background: rgba(200, 136, 60, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: linear-gradient(145deg, rgba(44,24,16,0.6), rgba(26,13,8,0.8));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(200, 136, 60, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.glass-panel-light {
+  background: linear-gradient(145deg, rgba(200,136,60,0.08), rgba(255,255,255,0.03));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 136, 60, 0.20);
+}
+
+/* Base Inputs */
+input[type="text"], input[type="number"], input[type="date"], select, textarea {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(200, 136, 60, 0.5);
+  box-shadow: 0 0 0 3px rgba(200, 136, 60, 0.15);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Glass Card Utility */
@@ -65,12 +102,12 @@ body {
 
   .glass-card:hover {
     border-color: rgba(200, 136, 60, 0.35);
-    box-shadow: 0 8px 32px rgba(44, 24, 16, 0.40), 0 0 20px rgba(212, 135, 78, 0.12);
-    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(44, 24, 16, 0.50), 0 0 24px rgba(212, 135, 78, 0.15);
+    transform: translateY(-4px);
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #D4874E 0%, #E8C99A 60%, #C8883C 100%);
+    background: linear-gradient(135deg, #F5EDD8 0%, #D4874E 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
