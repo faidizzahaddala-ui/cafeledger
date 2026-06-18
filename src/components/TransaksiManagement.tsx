@@ -26,13 +26,21 @@ const formatTanggal = (iso: string) =>
   });
 
 const categoryColor: Record<KategoriTransaksi, string> = {
-  Sales:   "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-  COGS:    "bg-amber-500/15   text-amber-400   border-amber-500/25",
-  Utility: "bg-blue-500/15    text-blue-400    border-blue-500/25",
-  Salary:  "bg-purple-500/15  text-purple-400  border-purple-500/25",
+  Sales:            "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+  "Other Income":   "bg-teal-500/15    text-teal-400    border-teal-500/25",
+  COGS:             "bg-amber-500/15   text-amber-400   border-amber-500/25",
+  Utility:          "bg-blue-500/15    text-blue-400    border-blue-500/25",
+  Salary:           "bg-purple-500/15  text-purple-400  border-purple-500/25",
+  "Other Expense":  "bg-pink-500/15    text-pink-400    border-pink-500/25",
 };
 
-const categoryOptions: KategoriTransaksi[] = ["Sales", "COGS", "Utility", "Salary"];
+// Kategori bergantung pada Tipe yang dipilih
+const categoryByType: Record<TipeTransaksi, KategoriTransaksi[]> = {
+  Pemasukan:   ["Sales", "Other Income"],
+  Pengeluaran: ["COGS", "Utility", "Salary", "Other Expense"],
+};
+
+const getCategoryOptions = (type: TipeTransaksi) => categoryByType[type];
 
 const defaultForm = {
   type:        "Pemasukan" as TipeTransaksi,
@@ -500,7 +508,15 @@ export default function TransaksiManagement() {
                     <select
                       id="form-type"
                       value={form.type}
-                      onChange={(e) => setForm({ ...form, type: e.target.value as TipeTransaksi })}
+                      onChange={(e) => {
+                        const newType = e.target.value as TipeTransaksi;
+                        const newCats = getCategoryOptions(newType);
+                        setForm({
+                          ...form,
+                          type: newType,
+                          category: newCats[0], // auto-reset ke kategori pertama dari tipe baru
+                        });
+                      }}
                       className="w-full appearance-none px-4 py-2.5 pr-9 rounded-xl text-sm font-medium text-[var(--text-primary)] outline-none transition-all duration-200 focus:ring-2 focus:ring-amber-500/30 cursor-pointer"
                       style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(200,136,60,0.18)" }}
                     >
@@ -526,7 +542,7 @@ export default function TransaksiManagement() {
                       className="w-full appearance-none px-4 py-2.5 pr-9 rounded-xl text-sm font-medium text-[var(--text-primary)] outline-none transition-all duration-200 focus:ring-2 focus:ring-amber-500/30 cursor-pointer"
                       style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(200,136,60,0.18)" }}
                     >
-                      {categoryOptions.map((c) => (
+                      {getCategoryOptions(form.type).map((c) => (
                         <option key={c} value={c} style={{ background: "#2C1810" }}>{c}</option>
                       ))}
                     </select>

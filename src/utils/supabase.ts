@@ -24,7 +24,7 @@ export type SupabaseClient = typeof supabase;
 
 // ── Types (sesuai skema tabel `transactions` di Supabase) ─────────────────────
 export type TipeTransaksi     = "Pemasukan" | "Pengeluaran";
-export type KategoriTransaksi = "Sales" | "COGS" | "Utility" | "Salary";
+export type KategoriTransaksi = "Sales" | "Other Income" | "COGS" | "Utility" | "Salary" | "Other Expense";
 
 export interface Transaksi {
   id:          string;
