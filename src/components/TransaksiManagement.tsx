@@ -70,7 +70,7 @@ export default function TransaksiManagement() {
     try {
       const data = await getTransaksi();
       setTransaksiList(data);
-    } catch {
+    } catch (_e) {
       setFetchError("Gagal memuat data transaksi dari server.");
     } finally {
       setLoading(false);
@@ -439,7 +439,11 @@ export default function TransaksiManagement() {
           id="modal-overlay"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
           style={{ background: "rgba(10,5,3,0.80)", backdropFilter: "blur(8px)" }}
-          onClick={(e) => e.target === e.currentTarget && closeModal()}
+          onClick={(e) => (e.target as HTMLElement) === e.currentTarget && closeModal()}
+          onKeyDown={(e) => e.key === "Escape" && closeModal()}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Form transaksi baru"
         >
           <div
             id="modal-transaksi"

@@ -309,6 +309,9 @@ export default function AppSidebar({ mobileOpen = false, onMobileClose }: AppSid
             className="absolute inset-0"
             style={{ background: "rgba(5,2,1,0.70)", backdropFilter: "blur(4px)" }}
             onClick={onMobileClose}
+            onKeyDown={(e) => e.key === "Escape" && onMobileClose?.()}
+            role="button"
+            tabIndex={0}
             aria-label="Tutup menu"
           />
 

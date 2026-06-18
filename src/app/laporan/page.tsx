@@ -113,7 +113,7 @@ export default function LaporanPage() {
     try {
       const data = await getTransaksi();
       setTransactions(data);
-    } catch {
+    } catch (_e) {
       setError("Gagal memuat data dari Supabase. Periksa koneksi dan coba lagi.");
     } finally {
       setLoading(false);

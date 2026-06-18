@@ -486,6 +486,10 @@ export default function PosPage() {
             className="absolute inset-0"
             style={{ background: "rgba(5,2,1,0.70)", backdropFilter: "blur(4px)" }}
             onClick={() => setMobileCartOpen(false)}
+            onKeyDown={(e) => e.key === "Escape" && setMobileCartOpen(false)}
+            role="button"
+            tabIndex={0}
+            aria-label="Tutup keranjang"
           />
           {/* Drawer — slides up from bottom, max 85vh */}
           <div

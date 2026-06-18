@@ -32,7 +32,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
       if (saved && ["Owner", "Kasir", "Barista"].includes(saved)) {
         setRoleState(saved);
       }
-    } catch {
+    } catch (_e) {
       // SSR or localStorage unavailable
     }
   }, []);
@@ -41,8 +41,8 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     setRoleState(newRole);
     try {
       localStorage.setItem("cafeledger-role", newRole);
-    } catch {
-      // ignore
+    } catch (_e) {
+      // localStorage unavailable
     }
   }, []);
 
