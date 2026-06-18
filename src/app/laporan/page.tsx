@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import AppSidebar from "@/components/AppSidebar";
+import AiBusinessAdvisor from "@/components/AiBusinessAdvisor";
 import { getTransaksi, type Transaksi } from "@/utils/supabase";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -129,6 +130,28 @@ export default function LaporanPage() {
       .reduce((s, t) => s + t.amount, 0);
     return { totalPendapatan, totalBeban, labaBersih: totalPendapatan - totalBeban };
   }, [transactions]);
+
+  // ── Stok Kritis Count (mirror dari /stok inventory data) ──────────────────
+  const stokKritis = useMemo(() => {
+    const stokItems = [
+      { stok: 8,   batasMin: 10  }, // Biji Kopi House Blend
+      { stok: 12,  batasMin: 5   }, // Biji Kopi Single Origin
+      { stok: 15,  batasMin: 20  }, // Susu UHT
+      { stok: 6,   batasMin: 5   }, // Oat Milk
+      { stok: 3,   batasMin: 4   }, // Whipped Cream
+      { stok: 2,   batasMin: 5   }, // Gula Aren Cair
+      { stok: 4,   batasMin: 3   }, // Sirup Karamel
+      { stok: 1,   batasMin: 3   }, // Sirup Vanilla
+      { stok: 18,  batasMin: 10  }, // Gula Pasir
+      { stok: 1.5, batasMin: 2   }, // Matcha Powder
+      { stok: 10,  batasMin: 5   }, // Tepung Terigu
+      { stok: 3,   batasMin: 2   }, // Mentega
+      { stok: 120, batasMin: 200 }, // Cup Plastik
+      { stok: 350, batasMin: 150 }, // Cup Paper Hot
+      { stok: 80,  batasMin: 100 }, // Sedotan Kertas
+    ];
+    return stokItems.filter((s) => s.stok < s.batasMin).length;
+  }, []);
 
   // ── Monthly Breakdown ──────────────────────────────────────────────────────
   const monthlyRows = useMemo<MonthRow[]>(() => {
@@ -356,6 +379,17 @@ export default function LaporanPage() {
                   </p>
                 </div>
               </div>
+            )}
+
+            {/* ── AI Business Advisor ── */}
+            {!loading && transactions.length > 0 && (
+              <AiBusinessAdvisor
+                totalPendapatan={totalPendapatan}
+                totalBeban={totalBeban}
+                labaBersih={labaBersih}
+                stokKritis={stokKritis}
+                loading={loading}
+              />
             )}
 
             {/* ── Tab Toggle ── */}
