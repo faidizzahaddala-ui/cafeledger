@@ -11,7 +11,7 @@ export default function PengaturanPage() {
       <AppSidebar mobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
       
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {/* Header */}
+        {/* ── Header ── */}
         <header
           className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 flex-shrink-0 gap-3"
           style={{ borderBottom: "1px solid rgba(200,136,60,0.12)" }}
@@ -19,15 +19,14 @@ export default function PengaturanPage() {
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="flex md:hidden w-9 h-9 rounded-xl items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] flex-shrink-0"
+              className="flex md:hidden w-9 h-9 rounded-xl items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] flex-shrink-0 transition-colors"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-light)" }}
-              aria-label="Buka menu"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
             </button>
-            <h1 className="text-base md:text-xl font-bold gradient-text">Pengaturan</h1>
+            <h1 className="text-base md:text-xl font-bold gradient-text truncate">Pengaturan</h1>
           </div>
         </header>
         

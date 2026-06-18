@@ -8,10 +8,15 @@ export default function AkunPage() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg-primary)" }}>
-      <AppSidebar mobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
-      
+      {/* ── Sidebar (desktop: in-flow | mobile: overlay drawer) ── */}
+      <AppSidebar
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+      />
+
+      {/* ── Main Content ── */}
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {/* Header */}
+        {/* ── Header ── */}
         <header
           className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 flex-shrink-0 gap-3"
           style={{ borderBottom: "1px solid rgba(200,136,60,0.12)" }}
@@ -19,20 +24,19 @@ export default function AkunPage() {
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="flex md:hidden w-9 h-9 rounded-xl items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] flex-shrink-0"
+              className="flex md:hidden w-9 h-9 rounded-xl items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] flex-shrink-0 transition-colors"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-light)" }}
-              aria-label="Buka menu"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
             </button>
-            <h1 className="text-base md:text-xl font-bold gradient-text">Manajemen Akun</h1>
+            <h1 className="text-base md:text-xl font-bold gradient-text truncate">Manajemen Akun</h1>
           </div>
         </header>
-        
-        {/* Body */}
-        <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
+
+        {/* ── Scrollable Body ── */}
+        <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto custom-scrollbar">
           <div
             className="max-w-md w-full rounded-2xl p-8 text-center flex flex-col items-center gap-5 animate-fade-up"
             style={{
@@ -46,8 +50,8 @@ export default function AkunPage() {
               style={{ background: "rgba(200,136,60,0.12)", border: "1px solid rgba(200,136,60,0.25)" }}
             >
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             </div>
             <div>
