@@ -70,7 +70,8 @@ export default function TransaksiManagement() {
     try {
       const data = await getTransaksi();
       setTransaksiList(data);
-    } catch (_e) {
+    } catch (error) {
+      console.error(error);
       setFetchError("Gagal memuat data transaksi dari server.");
     } finally {
       setLoading(false);
