@@ -8,6 +8,7 @@ import ChartPlaceholder from "@/components/ChartPlaceholder";
 import AppSidebar from "@/components/AppSidebar";
 import TransaksiManagement from "@/components/TransaksiManagement";
 import { insertTransaksi, type KategoriTransaksi } from "@/utils/supabase";
+import { useRole } from "@/context/RoleContext";
 
 // ── KPI Data ──────────────────────────────────────────────────────────────────
 const kpiData = [
@@ -77,6 +78,7 @@ const SEED_EXPENSE_TEMPLATES: { category: "COGS" | "Utility" | "Salary"; descs: 
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { role } = useRole();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [seeding, setSeeding]               = useState(false);
   const [seedProgress, setSeedProgress]     = useState(0);
@@ -250,7 +252,8 @@ export default function DashboardPage() {
             {/* ── Center Content Column ── */}
             <div className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 min-w-0">
 
-              {/* ── Seeder Banner ── */}
+              {/* ── Seeder Banner (Owner only) ── */}
+              {role === "Owner" && (
               <div
                 className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-4 md:px-5 py-3 md:py-4 rounded-2xl animate-fade-in"
                 style={{
@@ -319,6 +322,7 @@ export default function DashboardPage() {
                   )}
                 </button>
               </div>
+              )}
 
               {/* Section Label */}
               <div className="flex items-center gap-3">
@@ -334,9 +338,11 @@ export default function DashboardPage() {
 
               {/* ── KPI Cards: 1 col mobile → 3 col sm+ ── */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4" id="kpi-cards-section">
-                {kpiData.map((kpi) => (
-                  <KpiCard key={kpi.title} {...kpi}/>
-                ))}
+                {kpiData
+                  .filter((kpi) => role === "Owner" || kpi.title !== "Laba Bersih Sementara")
+                  .map((kpi) => (
+                    <KpiCard key={kpi.title} {...kpi}/>
+                  ))}
               </div>
 
               {/* ── Transaksi Management (overflow-x-auto handled inside) ── */}

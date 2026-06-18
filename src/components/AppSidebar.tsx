@@ -3,8 +3,18 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRole, type UserRole } from "@/context/RoleContext";
 
-const navItems = [
+// ── Nav Item Definition ───────────────────────────────────────────────────────
+interface NavItem {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  roles: UserRole[]; // which roles can see this item
+  badge?: React.ReactNode;
+}
+
+const navItems: NavItem[] = [
   {
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -14,6 +24,7 @@ const navItems = [
     ),
     label: "Dashboard",
     href: "/",
+    roles: ["Owner", "Kasir"],
   },
   {
     icon: (
@@ -23,6 +34,12 @@ const navItems = [
     ),
     label: "Kasir POS",
     href: "/pos",
+    roles: ["Owner", "Kasir"],
+    badge: (
+      <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wide">
+        Live
+      </span>
+    ),
   },
   {
     icon: (
@@ -34,6 +51,7 @@ const navItems = [
     ),
     label: "Transaksi",
     href: "/transaksi",
+    roles: ["Owner"],
   },
   {
     icon: (
@@ -43,6 +61,7 @@ const navItems = [
     ),
     label: "Laporan Keuangan",
     href: "/laporan",
+    roles: ["Owner"],
   },
   {
     icon: (
@@ -53,6 +72,7 @@ const navItems = [
     ),
     label: "Stok Bahan Baku",
     href: "/stok",
+    roles: ["Owner", "Barista"],
   },
   {
     icon: (
@@ -63,6 +83,7 @@ const navItems = [
     ),
     label: "Manajemen Akun",
     href: "/akun",
+    roles: ["Owner"],
   },
   {
     icon: (
@@ -73,10 +94,18 @@ const navItems = [
     ),
     label: "Pengaturan",
     href: "/pengaturan",
+    roles: ["Owner"],
   },
 ];
 
-// ── Shared sidebar content (reused for desktop + mobile drawer) ───────────────
+// ── Role Config ───────────────────────────────────────────────────────────────
+const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bg: string; avatar: string; email: string }> = {
+  Owner:   { label: "Owner",   color: "text-amber-400",   bg: "bg-amber-500/15 border-amber-500/25",   avatar: "from-amber-600 to-orange-700",  email: "owner@yallacoffee.id" },
+  Kasir:   { label: "Kasir",   color: "text-emerald-400", bg: "bg-emerald-500/15 border-emerald-500/25", avatar: "from-emerald-600 to-green-700", email: "kasir@yallacoffee.id" },
+  Barista: { label: "Barista", color: "text-blue-400",    bg: "bg-blue-500/15 border-blue-500/25",     avatar: "from-blue-600 to-indigo-700",   email: "barista@yallacoffee.id" },
+};
+
+// ── Shared sidebar content ────────────────────────────────────────────────────
 function SidebarContent({
   collapsed,
   onLinkClick,
@@ -87,8 +116,14 @@ function SidebarContent({
   onToggleCollapse?: () => void;
 }) {
   const pathname = usePathname();
+  const { role, setRole } = useRole();
+  const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
+
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  const visibleItems = navItems.filter((item) => item.roles.includes(role));
+  const cfg = ROLE_CONFIG[role];
 
   return (
     <>
@@ -129,7 +164,7 @@ function SidebarContent({
             Menu Utama
           </p>
         )}
-        {navItems.map((item) => (
+        {visibleItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -142,28 +177,97 @@ function SidebarContent({
             {!collapsed && (
               <span className="flex items-center gap-2 flex-1">
                 {item.label}
-                {item.href === "/pos" && (
-                  <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wide">
-                    Live
-                  </span>
-                )}
+                {item.badge}
               </span>
             )}
           </Link>
         ))}
       </nav>
 
-      {/* User Info */}
-      <div className={`px-3 py-4 border-t border-white/[0.06] flex items-center gap-3 flex-shrink-0 ${collapsed ? "justify-center" : ""}`}>
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center flex-shrink-0 text-xs font-bold text-white">
-          Y
+      {/* ── Role Switcher ── */}
+      <div className={`px-3 py-3 border-t border-white/[0.06] flex-shrink-0 ${collapsed ? "flex justify-center" : ""}`}>
+        <div className="relative">
+          <button
+            id="role-switcher-btn"
+            onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
+            className={`w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl transition-all duration-200 hover:bg-white/[0.04] ${
+              collapsed ? "justify-center" : ""
+            }`}
+            style={{ border: "1px solid transparent" }}
+          >
+            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${cfg.avatar} flex items-center justify-center flex-shrink-0 text-xs font-bold text-white`}>
+              {cfg.label[0]}
+            </div>
+            {!collapsed && (
+              <>
+                <div className="flex flex-col overflow-hidden text-left flex-1 min-w-0">
+                  <span className="text-[12px] font-semibold text-[var(--text-primary)] truncate">{cfg.label}</span>
+                  <span className="text-[10px] text-[var(--text-muted)] truncate">{cfg.email}</span>
+                </div>
+                <svg
+                  width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2"
+                  className={`flex-shrink-0 transition-transform duration-200 ${roleSwitcherOpen ? "rotate-180" : ""}`}
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </>
+            )}
+          </button>
+
+          {/* Dropdown */}
+          {roleSwitcherOpen && (
+            <div
+              className={`absolute ${collapsed ? "left-full ml-2 bottom-0" : "left-0 right-0 bottom-full mb-2"} rounded-xl overflow-hidden animate-fade-in z-50`}
+              style={{
+                background: "linear-gradient(145deg, #3A1F12, #2E1710)",
+                border: "1px solid rgba(200,136,60,0.25)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.60), 0 0 0 1px rgba(200,136,60,0.08)",
+                minWidth: collapsed ? "180px" : undefined,
+              }}
+            >
+              <div className="px-3 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[var(--text-muted)] opacity-70">
+                  Ganti Peran
+                </p>
+              </div>
+              {(["Owner", "Kasir", "Barista"] as UserRole[]).map((r) => {
+                const rc = ROLE_CONFIG[r];
+                const isSelected = role === r;
+                return (
+                  <button
+                    key={r}
+                    id={`role-option-${r.toLowerCase()}`}
+                    onClick={() => {
+                      setRole(r);
+                      setRoleSwitcherOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all hover:bg-white/[0.04] ${
+                      isSelected ? "bg-white/[0.06]" : ""
+                    }`}
+                  >
+                    <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${rc.avatar} flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white`}>
+                      {rc.label[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold text-[var(--text-primary)]">{rc.label}</p>
+                      <p className="text-[10px] text-[var(--text-muted)]">{rc.email}</p>
+                    </div>
+                    {isSelected && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2.5" className="flex-shrink-0">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+              <div className="px-3 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-[9px] text-[var(--text-muted)] opacity-50 leading-relaxed">
+                  Mode demo — role berubah instan tanpa refresh
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-        {!collapsed && (
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-[12px] font-semibold text-[var(--text-primary)] truncate">Admin Yalla</span>
-            <span className="text-[10px] text-[var(--text-muted)] truncate">admin@yallacoffee.id</span>
-          </div>
-        )}
       </div>
     </>
   );
