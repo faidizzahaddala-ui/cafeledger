@@ -56,12 +56,14 @@ export async function getTransaksi(): Promise<Transaksi[]> {
 /**
  * Menyimpan satu transaksi baru ke tabel `transactions`.
  * Kolom: type, category, description, amount (id & created_at di-generate Supabase).
+ * Opsional: created_at bisa di-override (untuk seeder / demo data).
  */
 export async function insertTransaksi(payload: {
   type:        TipeTransaksi;
   category:    KategoriTransaksi;
   description: string;
   amount:      number;
+  created_at?: string;
 }): Promise<Transaksi | null> {
   const { data, error } = await supabase
     .from("transactions")

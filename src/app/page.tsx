@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import KpiCard from "@/components/KpiCard";
 import StockAlerts from "@/components/StockAlerts";
 import ChartPlaceholder from "@/components/ChartPlaceholder";
 import AppSidebar from "@/components/AppSidebar";
 import TransaksiManagement from "@/components/TransaksiManagement";
+import { insertTransaksi } from "@/utils/supabase";
 
 // ── KPI Data ──────────────────────────────────────────────────────────────────
 const kpiData = [
@@ -54,8 +56,90 @@ const kpiData = [
 ];
 
 // ── Page Component ─────────────────────────────────────────────────────────────
+// ── Seeder: Dummy Data Templates ──────────────────────────────────────────────
+const SEED_INCOME_DESCS = [
+  "Meja 4 - V60 & Americano", "Takeaway Kopi Susu Yalla", "GrabFood Order #GF-4821",
+  "Meja 7 - 2x Cappuccino & Croissant", "GoFood Order #GO-1293", "Penjualan Es Kopi Aren x3",
+  "Meja 1 - Latte & Cheesecake", "Penjualan Matcha Latte takeaway", "Catering kantor 10 cup",
+  "Meja 12 - Espresso Double & Waffle", "ShopeeFood Order #SF-887", "Walk-in 3x Cold Brew",
+  "Meja 9 - Caramel Macchiato & Banana Bread", "Penjualan paket Es Teh Tarik x5",
+  "Meja 2 - V60 Single Origin pour over", "Grab Pickup - 4x Kopi Susu",
+  "Event private brewing session", "Meja 6 - Americano & Club Sandwich",
+  "Pre-order 15 cup kopi meeting", "Penjualan merchandise tumbler Yalla",
+  "Meja 3 - 2x Latte Panas & 2x Croissant",
+];
+
+const SEED_EXPENSE_TEMPLATES: { category: "COGS" | "Utility" | "Salary"; descs: string[] }[] = [
+  { category: "COGS",    descs: ["Restock Susu UHT 10 liter", "Biji Kopi Espresso Blend 5kg", "Gula Aren Cair 3 liter", "Restock Oat Milk", "Beli Matcha Powder 1kg", "Cup Plastik 16oz 500pcs", "Sedotan Kertas 200pcs", "Mentega & Tepung untuk pastry"] },
+  { category: "Utility", descs: ["Token Listrik bulan ini", "Tagihan Air PDAM", "Internet WiFi Indihome", "Biaya maintenance mesin espresso"] },
+  { category: "Salary",  descs: ["Fee Barista Part-time Minggu 1", "Fee Barista Part-time Minggu 2", "Gaji kasir shift pagi", "Bonus lembur weekend"] },
+];
+
 export default function DashboardPage() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [seeding, setSeeding]               = useState(false);
+  const [seedProgress, setSeedProgress]     = useState(0);
+  const [seedDone, setSeedDone]             = useState(false);
+  const [seedError, setSeedError]           = useState<string | null>(null);
+
+  // ── Seeder Function ─────────────────────────────────────────────────────────
+  const handleSeed = async () => {
+    setSeeding(true);
+    setSeedProgress(0);
+    setSeedDone(false);
+    setSeedError(null);
+
+    const TOTAL = 30;
+    const now = Date.now();
+    const DAY = 86_400_000;
+    let success = 0;
+
+    for (let i = 0; i < TOTAL; i++) {
+      // Random date within last 30 days
+      const daysAgo = Math.floor(Math.random() * 30);
+      const hrs     = Math.floor(Math.random() * 12) + 7;  // 07:00 – 19:00
+      const mins    = Math.floor(Math.random() * 60);
+      const ts      = new Date(now - daysAgo * DAY);
+      ts.setHours(hrs, mins, 0, 0);
+      const created_at = ts.toISOString();
+
+      const isIncome = Math.random() < 0.7; // 70% income
+
+      let type: "Pemasukan" | "Pengeluaran";
+      let category: string;
+      let description: string;
+      let amount: number;
+
+      if (isIncome) {
+        type = "Pemasukan";
+        category = "Sales";
+        description = SEED_INCOME_DESCS[Math.floor(Math.random() * SEED_INCOME_DESCS.length)];
+        amount = Math.round((Math.random() * 125_000 + 25_000) / 1_000) * 1_000; // 25k – 150k, round to 1k
+      } else {
+        const tpl = SEED_EXPENSE_TEMPLATES[Math.floor(Math.random() * SEED_EXPENSE_TEMPLATES.length)];
+        type = "Pengeluaran";
+        category = tpl.category;
+        description = tpl.descs[Math.floor(Math.random() * tpl.descs.length)];
+        amount = Math.round((Math.random() * 300_000 + 50_000) / 5_000) * 5_000; // 50k – 350k, round to 5k
+      }
+
+      const result = await insertTransaksi({ type, category: category as any, amount, description, created_at });
+      if (result) success++;
+      setSeedProgress(i + 1);
+    }
+
+    setSeeding(false);
+
+    if (success < TOTAL * 0.5) {
+      setSeedError(`Hanya ${success}/${TOTAL} berhasil. Periksa koneksi Supabase.`);
+    } else {
+      setSeedDone(true);
+      // Auto-refresh page data
+      router.refresh();
+      setTimeout(() => setSeedDone(false), 5000);
+    }
+  };
 
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -165,6 +249,76 @@ export default function DashboardPage() {
 
             {/* ── Center Content Column ── */}
             <div className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 min-w-0">
+
+              {/* ── Seeder Banner ── */}
+              <div
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-4 md:px-5 py-3 md:py-4 rounded-2xl animate-fade-in"
+                style={{
+                  background: "linear-gradient(135deg, rgba(139,69,19,0.20), rgba(200,136,60,0.08))",
+                  border: "1px solid rgba(200,136,60,0.30)",
+                  boxShadow: "0 4px 20px rgba(139,69,19,0.15)",
+                }}
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "linear-gradient(135deg,#8B4513,#C8883C)", boxShadow: "0 0 16px rgba(212,135,78,0.35)" }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F5EDD8" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-[var(--text-primary)] leading-tight">
+                      {seeding ? `Seeding data… ${seedProgress}/30` : "Demo Mode — Data Seeder"}
+                    </p>
+                    <p className="text-[11px] text-[var(--text-muted)] mt-0.5 leading-relaxed">
+                      {seedDone
+                        ? "✅ 30 transaksi dummy berhasil ditambahkan!"
+                        : seedError
+                        ? seedError
+                        : "Klik tombol untuk mengisi 30 transaksi acak (30 hari terakhir) ke Supabase."}
+                    </p>
+                    {seeding && (
+                      <div className="w-full max-w-[200px] h-1.5 rounded-full bg-white/[0.08] mt-2 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-400 transition-all duration-300"
+                          style={{ width: `${(seedProgress / 30) * 100}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  id="btn-seed-dummy"
+                  onClick={handleSeed}
+                  disabled={seeding}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 whitespace-nowrap flex-shrink-0"
+                  style={{
+                    background: seeding
+                      ? "rgba(255,255,255,0.06)"
+                      : "linear-gradient(135deg, #B8621B, #D4874E)",
+                    color: seeding ? "var(--text-muted)" : "#1A0D08",
+                    boxShadow: seeding ? "none" : "0 4px 20px rgba(184,98,27,0.45), 0 0 0 1px rgba(212,135,78,0.20)",
+                  }}
+                >
+                  {seeding ? (
+                    <>
+                      <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                      </svg>
+                      Seeding…
+                    </>
+                  ) : (
+                    <>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M12 3v18M3 12h18"/>
+                      </svg>
+                      Generate 30 Data Dummy
+                    </>
+                  )}
+                </button>
+              </div>
 
               {/* Section Label */}
               <div className="flex items-center gap-3">
