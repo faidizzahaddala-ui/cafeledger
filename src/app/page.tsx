@@ -7,7 +7,7 @@ import StockAlerts from "@/components/StockAlerts";
 import ChartPlaceholder from "@/components/ChartPlaceholder";
 import AppSidebar from "@/components/AppSidebar";
 import TransaksiManagement from "@/components/TransaksiManagement";
-import { insertTransaksi } from "@/utils/supabase";
+import { insertTransaksi, type KategoriTransaksi } from "@/utils/supabase";
 
 // ── KPI Data ──────────────────────────────────────────────────────────────────
 const kpiData = [
@@ -124,7 +124,7 @@ export default function DashboardPage() {
         amount = Math.round((Math.random() * 300_000 + 50_000) / 5_000) * 5_000; // 50k – 350k, round to 5k
       }
 
-      const result = await insertTransaksi({ type, category: category as any, amount, description, created_at });
+      const result = await insertTransaksi({ type, category: category as KategoriTransaksi, amount, description, created_at });
       if (result) success++;
       setSeedProgress(i + 1);
     }
