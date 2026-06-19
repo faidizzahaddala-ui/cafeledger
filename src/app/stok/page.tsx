@@ -329,7 +329,7 @@ export default function StokPage() {
 
                           {/* Kategori */}
                           <td className="px-4 md:px-5 py-3.5">
-                            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${kategoriColor[item.kategori] ?? ""}`}>
+                            <span className={`inline-block whitespace-nowrap text-[10px] font-semibold px-2.5 py-1 rounded-full border ${kategoriColor[item.kategori] ?? ""}`}>
                               {item.kategori}
                             </span>
                           </td>
