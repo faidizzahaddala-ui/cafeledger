@@ -205,6 +205,28 @@ export default function LaporanPage() {
     weekday: "long", day: "2-digit", month: "long", year: "numeric",
   });
 
+  // ── Export CSV ─────────────────────────────────────────────────────────────
+  const handleExportCSV = () => {
+    const header = ["ID,Tanggal,Waktu,Jenis,Kategori,Deskripsi,Jumlah"];
+    const rows = transactions.map((t) => {
+      const dt = new Date(t.created_at);
+      const date = dt.toLocaleDateString("id-ID");
+      const time = dt.toLocaleTimeString("id-ID");
+      // Escape quotes in description
+      const desc = t.description ? t.description.replace(/"/g, '""') : "";
+      return `${t.id},${date},${time},${t.type},${t.category},"${desc}",${t.amount}`;
+    });
+    const csvContent = header.concat(rows).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Laporan_YallaCoffee_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // ── Access Guard (after all hooks) ─────────────────────────────────────────
   if (role !== "Owner") {
     return (
@@ -469,6 +491,15 @@ export default function LaporanPage() {
                 Rincian Arus Kas
               </h2>
               <div className="flex-1 h-px bg-white/[0.06]"/>
+              <button
+                onClick={handleExportCSV}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 flex items-center gap-1.5 whitespace-nowrap"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Unduh CSV
+              </button>
               <div className="flex gap-1.5">
                 {(["bulanan", "kategori"] as const).map((tab) => (
                   <button

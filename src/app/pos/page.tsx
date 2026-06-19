@@ -46,6 +46,50 @@ interface CartItem extends MenuItem { qty: number; }
 const formatRp = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 
+const playBeep = () => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.1);
+    osc.stop(ctx.currentTime + 0.1);
+  } catch {
+    // Ignore audio errors
+  }
+};
+
+const playKaching = () => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+    osc1.type = "square";
+    osc2.type = "triangle";
+    osc1.frequency.setValueAtTime(1200, ctx.currentTime);
+    osc2.frequency.setValueAtTime(1600, ctx.currentTime);
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    osc1.start();
+    osc2.start();
+    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
+    osc1.stop(ctx.currentTime + 0.3);
+    osc2.stop(ctx.currentTime + 0.3);
+  } catch {
+    // Ignore audio errors
+  }
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function PosPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("Semua");
@@ -53,6 +97,7 @@ export default function PosPage() {
   const [paying, setPaying]                 = useState(false);
   const [successModal, setSuccessModal]     = useState(false);
   const [lastTotal, setLastTotal]           = useState(0);
+  const [lastCart, setLastCart]             = useState<CartItem[]>([]);
   const [payError, setPayError]             = useState<string | null>(null);
   const [search, setSearch]                 = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -75,6 +120,7 @@ export default function PosPage() {
 
   // ── Cart helpers ──────────────────────────────────────────────────────────
   const addToCart = (item: MenuItem) => {
+    playBeep();
     setCart((prev) => {
       const existing = prev.find((c) => c.id === item.id);
       if (existing) return prev.map((c) => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
@@ -131,9 +177,11 @@ export default function PosPage() {
 
     setLastTotal(total);
     setLastChange(paymentMethod === "Tunai" ? amountTendered - total : 0);
+    setLastCart([...cart]);
     setCart([]);
     setPaymentModalOpen(false);
     setMobileCartOpen(false);
+    playKaching();
     setSuccessModal(true);
   };
 
@@ -638,76 +686,63 @@ export default function PosPage() {
         </div>
       )}
 
-      {/* ══ Success Modal ══ */}
+      {/* ══ Success Modal / Receipt ══ */}
       {successModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
           style={{ background: "rgba(5,2,1,0.85)", backdropFilter: "blur(10px)" }}
         >
-          <div
-            className="w-full max-w-sm rounded-3xl flex flex-col items-center gap-5 p-8 animate-fade-up text-center"
-            style={{
-              background: "linear-gradient(145deg,#2E1A10,#1A0D06)",
-              border: "1px solid rgba(200,136,60,0.30)",
-              boxShadow: "0 32px 80px rgba(0,0,0,0.70), 0 0 60px rgba(212,135,78,0.12)",
-            }}
-          >
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center animate-fade-in"
-              style={{ background: "linear-gradient(135deg,rgba(22,163,74,0.25),rgba(22,163,74,0.10))", border: "2px solid rgba(22,163,74,0.40)" }}
-            >
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
+          <div className="w-full max-w-sm bg-[#f8f9fa] text-[#1a1a1a] rounded-sm flex flex-col p-6 animate-fade-up shadow-2xl relative font-mono text-sm" style={{ borderTop: "4px dashed #ccc", borderBottom: "4px dashed #ccc" }}>
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold tracking-widest uppercase border-b-2 border-dashed border-[#ccc] pb-2 mb-2">YallaCaffe</h2>
+              <p className="text-xs text-gray-500">Jl. Kopi Harum No. 123</p>
+              <p className="text-xs text-gray-500">Tel: 0812-3456-7890</p>
             </div>
 
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-400 mb-1">Pembayaran Berhasil</p>
-              <p className="text-3xl font-bold text-[var(--text-primary)]">{formatRp(lastTotal)}</p>
-              <p className="text-[12px] text-[var(--text-muted)] mt-2">
-                Tersimpan ke tabel{" "}
-                <code className="font-mono bg-white/[0.06] px-1 rounded text-amber-400">transactions</code>
-              </p>
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 mb-1">Receipt: #INV-{Math.floor(Math.random() * 100000).toString().padStart(5, '0')}</p>
+              <p className="text-xs text-gray-500">Date: {new Date().toLocaleString('id-ID')}</p>
             </div>
 
-            <div
-              className="w-full px-4 py-3 rounded-xl text-left"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-            >
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-2">Ringkasan</p>
-              <div className="flex justify-between text-xs">
-                <span className="text-[var(--text-muted)]">Tipe</span>
-                <span className="text-emerald-400 font-semibold">Pemasukan</span>
-              </div>
-              <div className="flex justify-between text-xs mt-1">
-                <span className="text-[var(--text-muted)]">Kategori</span>
-                <span className="text-[var(--text-primary)] font-semibold">Sales</span>
-              </div>
-              <div className="flex justify-between text-xs mt-1">
-                <span className="text-[var(--text-muted)]">Total Tagihan</span>
-                <span className="font-bold" style={{ color: "var(--gold)" }}>{formatRp(lastTotal)}</span>
-              </div>
-              {lastChange > 0 && (
-                <div className="flex justify-between text-xs mt-2 pt-2 border-t border-white/[0.06]">
-                  <span className="text-[var(--text-muted)] font-medium">Kembalian</span>
-                  <span className="font-bold text-amber-400 text-sm">{formatRp(lastChange)}</span>
+            <div className="border-t border-b border-dashed border-[#ccc] py-3 mb-4 flex flex-col gap-2 max-h-[40vh] overflow-y-auto">
+              {lastCart.map((item, idx) => (
+                <div key={idx} className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold">{item.name}</p>
+                    <p className="text-xs text-gray-500">{item.qty} x {formatRp(item.price)}</p>
+                  </div>
+                  <p className="font-semibold">{formatRp(item.qty * item.price)}</p>
                 </div>
-              )}
+              ))}
             </div>
 
-            <div className="flex gap-3 w-full">
+            <div className="flex flex-col gap-1 mb-6">
+              <div className="flex justify-between font-bold text-base">
+                <span>TOTAL</span>
+                <span>{formatRp(lastTotal)}</span>
+              </div>
+              <div className="flex justify-between text-xs mt-2">
+                <span>TUNAI/BAYAR</span>
+                <span>{formatRp(lastTotal + lastChange)}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span>KEMBALI</span>
+                <span>{formatRp(lastChange)}</span>
+              </div>
+            </div>
+
+            <div className="text-center text-xs text-gray-500 mb-6">
+              <p>Terima Kasih</p>
+              <p>Silakan Datang Kembali</p>
+            </div>
+
+            <div className="flex gap-3 w-full mt-auto">
               <button
                 id="success-new-order-btn"
                 onClick={() => setSuccessModal(false)}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
-                style={{
-                  background: "linear-gradient(135deg,#8B4513,#C8883C)",
-                  color: "#F5EDD8",
-                  boxShadow: "0 4px 16px rgba(139,69,19,0.40)",
-                }}
+                className="flex-1 py-3 bg-[#1a1a1a] text-white rounded font-bold uppercase tracking-wider hover:bg-[#333] transition-colors"
               >
-                + Pesanan Baru
+                Tutup & Pesanan Baru
               </button>
             </div>
           </div>
