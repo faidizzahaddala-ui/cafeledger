@@ -1,3 +1,4 @@
+const secureRandom = () => { const arr = new Uint32Array(1); crypto.getRandomValues(arr); return arr[0] / 4294967296; };
 "use client";
 
 import { useState } from "react";
@@ -99,14 +100,14 @@ export default function DashboardPage() {
 
     for (let i = 0; i < TOTAL; i++) {
       // Random date within last 30 days
-      const daysAgo = Math.floor(Math.random() * 30);
-      const hrs     = Math.floor(Math.random() * 12) + 7;  // 07:00 – 19:00
-      const mins    = Math.floor(Math.random() * 60);
+      const daysAgo = Math.floor(secureRandom() * 30);
+      const hrs     = Math.floor(secureRandom() * 12) + 7;  // 07:00 – 19:00
+      const mins    = Math.floor(secureRandom() * 60);
       const ts      = new Date(now - daysAgo * DAY);
       ts.setHours(hrs, mins, 0, 0);
       const created_at = ts.toISOString();
 
-      const isIncome = Math.random() < 0.7; // 70% income
+      const isIncome = secureRandom() < 0.7; // 70% income
 
       let type: "Pemasukan" | "Pengeluaran";
       let category: string;
@@ -116,14 +117,14 @@ export default function DashboardPage() {
       if (isIncome) {
         type = "Pemasukan";
         category = "Sales";
-        description = SEED_INCOME_DESCS[Math.floor(Math.random() * SEED_INCOME_DESCS.length)];
-        amount = Math.round((Math.random() * 125_000 + 25_000) / 1_000) * 1_000; // 25k – 150k, round to 1k
+        description = SEED_INCOME_DESCS[Math.floor(secureRandom() * SEED_INCOME_DESCS.length)];
+        amount = Math.round((secureRandom() * 125_000 + 25_000) / 1_000) * 1_000; // 25k – 150k, round to 1k
       } else {
-        const tpl = SEED_EXPENSE_TEMPLATES[Math.floor(Math.random() * SEED_EXPENSE_TEMPLATES.length)];
+        const tpl = SEED_EXPENSE_TEMPLATES[Math.floor(secureRandom() * SEED_EXPENSE_TEMPLATES.length)];
         type = "Pengeluaran";
         category = tpl.category;
-        description = tpl.descs[Math.floor(Math.random() * tpl.descs.length)];
-        amount = Math.round((Math.random() * 300_000 + 50_000) / 5_000) * 5_000; // 50k – 350k, round to 5k
+        description = tpl.descs[Math.floor(secureRandom() * tpl.descs.length)];
+        amount = Math.round((secureRandom() * 300_000 + 50_000) / 5_000) * 5_000; // 50k – 350k, round to 5k
       }
 
       const result = await insertTransaksi({ type, category: category as KategoriTransaksi, amount, description, created_at });

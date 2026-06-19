@@ -1,3 +1,4 @@
+const secureRandom = () => { const arr = new Uint32Array(1); crypto.getRandomValues(arr); return arr[0] / 4294967296; };
 "use client";
 
 import { useState, useMemo } from "react";
@@ -577,8 +578,8 @@ export default function PosPage() {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
           style={{ background: "rgba(5,2,1,0.85)", backdropFilter: "blur(10px)" }}
-          onClick={(e) => (e.target as HTMLElement) === e.currentTarget && setPaymentModalOpen(false)}
-        >
+          onClick={(e) => (e.target as HTMLElement) === e.currentTarget && setPaymentModalOpen(false)} onKeyDown={(e) => { if(e.key==='Enter' || e.key===' ') { ((e) => (e.target as HTMLElement) === e.currentTarget && setPaymentModalOpen(false))(e); } }}
+         role="button" tabIndex={0}>
           <div
             className="w-full max-w-md rounded-3xl flex flex-col p-6 animate-fade-up glass-panel"
           >
@@ -700,7 +701,7 @@ export default function PosPage() {
             </div>
 
             <div className="mb-4">
-              <p className="text-xs text-gray-500 mb-1">Receipt: #INV-{Math.floor(Math.random() * 100000).toString().padStart(5, '0')}</p>
+              <p className="text-xs text-gray-500 mb-1">Receipt: #INV-{Math.floor(secureRandom() * 100000).toString().padStart(5, '0')}</p>
               <p className="text-xs text-gray-500">Date: {new Date().toLocaleString('id-ID')}</p>
             </div>
 
