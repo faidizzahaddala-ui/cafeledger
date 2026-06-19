@@ -73,6 +73,8 @@ export default function StokPage() {
   const [editItem, setEditItem]             = useState<BahanBaku | null>(null);
   const [deltaStok, setDeltaStok]           = useState("");
   const [deltaMode, setDeltaMode]           = useState<"tambah" | "kurangi">("tambah");
+  const [showAddModal, setShowAddModal]     = useState(false);
+  const [addForm, setAddForm]               = useState({ nama: "", kategori: "Kopi" as BahanBaku["kategori"], satuan: "kg", stok: "", batasMin: "" });
 
   // ── Filtered & sorted data ─────────────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -107,6 +109,28 @@ export default function StokPage() {
     setDeltaStok("");
     setDeltaMode("tambah");
     setShowModal(true);
+  };
+
+  // ── Modal: Add Save ────────────────────────────────────────────────────────
+  const handleAddSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addForm.nama || !addForm.satuan || !addForm.stok || !addForm.batasMin) return;
+    
+    const newId = data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
+    const newItem: BahanBaku = {
+      id: newId,
+      nama: addForm.nama,
+      satuan: addForm.satuan,
+      stok: Number(addForm.stok),
+      batasMin: Number(addForm.batasMin),
+      kategori: addForm.kategori,
+      emoji: "📦",
+      lastUpdated: new Date().toISOString().split("T")[0]
+    };
+    
+    setData([newItem, ...data]);
+    setShowAddModal(false);
+    setAddForm({ nama: "", kategori: "Kopi", satuan: "kg", stok: "", batasMin: "" });
   };
 
   // ── Modal: save ────────────────────────────────────────────────────────────
@@ -225,7 +249,7 @@ export default function StokPage() {
                 />
               </div>
               {/* Category filter */}
-              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 -mb-0.5">
+              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 -mb-0.5 flex-1">
                 {filterOptions.map((opt) => (
                   <button
                     key={opt}
@@ -245,6 +269,14 @@ export default function StokPage() {
                   </button>
                 ))}
               </div>
+              {/* Add New Item Button */}
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-2 hover:-translate-y-0.5 active:scale-95 text-white"
+                style={{ background: "linear-gradient(135deg, #8B4513, #C8883C)", boxShadow: "0 4px 12px rgba(139,69,19,0.3)" }}
+              >
+                + Tambah Bahan Baku
+              </button>
             </div>
 
             {/* ── Inventory Table ── */}
@@ -385,19 +417,22 @@ export default function StokPage() {
         </div>
       </main>
 
-      {/* ══ Modal: Update Stok ══ */}
+      {/* ── Modal Update Stok ── */}
       {showModal && editItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
-          style={{ background: "rgba(10,5,3,0.80)", backdropFilter: "blur(8px)" }}
-          onClick={(e) => (e.target as HTMLElement) === e.currentTarget && setShowModal(false)}
-          onKeyDown={(e) => e.key === "Escape" && setShowModal(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Update stok modal"
         >
           <div
-            className="w-full max-w-md rounded-2xl flex flex-col animate-fade-up overflow-hidden"
+            className="absolute inset-0"
+            style={{ background: "rgba(10,5,3,0.80)", backdropFilter: "blur(8px)" }}
+            onClick={(e) => (e.target as HTMLElement) === e.currentTarget && setShowModal(false)}
+            onKeyDown={(e) => e.key === "Escape" && setShowModal(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Update stok modal"
+          />
+          <div
+            className="w-full max-w-md rounded-2xl flex flex-col animate-fade-up overflow-hidden relative z-10"
             style={{
               background: "linear-gradient(145deg, #2E1A10, #1F0D06)",
               border: "1px solid rgba(200,136,60,0.22)",
@@ -538,6 +573,85 @@ export default function StokPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal Tambah Bahan Baku ── */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div
+            className="absolute inset-0"
+            style={{ background: "rgba(5,2,1,0.85)", backdropFilter: "blur(8px)" }}
+            onClick={(e) => (e.target as HTMLElement) === e.currentTarget && setShowAddModal(false)}
+            onKeyDown={(e) => e.key === "Escape" && setShowAddModal(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Tambah stok modal"
+          />
+          <div
+            className="w-full max-w-md rounded-3xl p-6 relative z-10 animate-fade-up flex flex-col"
+            style={{
+              background: "linear-gradient(145deg,#2E1A10,#1A0D06)",
+              border: "1px solid rgba(200,136,60,0.25)",
+              boxShadow: "0 32px 80px rgba(0,0,0,0.80), 0 0 0 1px rgba(255,255,255,0.03) inset",
+            }}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex gap-3 items-center">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg shadow-inner"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  📦
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] leading-tight">Tambah Barang Baru</h3>
+                  <p className="text-[10px] font-semibold text-amber-400 mt-0.5 tracking-wider uppercase">Inventaris Stok</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAddModal(false)} className="p-1 rounded-lg text-[var(--text-muted)] hover:text-white hover:bg-white/[0.08] transition-colors">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleAddSave} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Nama Bahan</label>
+                <input type="text" required value={addForm.nama} onChange={(e) => setAddForm({...addForm, nama: e.target.value})} placeholder="Mis. Sirup Hazelnut" className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-500/50" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Kategori</label>
+                <select value={addForm.kategori} onChange={(e) => setAddForm({...addForm, kategori: e.target.value as BahanBaku["kategori"]})} className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-500/50 appearance-none">
+                  <option value="Kopi">Kopi</option>
+                  <option value="Susu & Krim">Susu & Krim</option>
+                  <option value="Pemanis">Pemanis</option>
+                  <option value="Bahan Makanan">Bahan Makanan</option>
+                  <option value="Packaging">Packaging</option>
+                </select>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Satuan</label>
+                  <input type="text" required value={addForm.satuan} onChange={(e) => setAddForm({...addForm, satuan: e.target.value})} placeholder="kg, liter, pcs" className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-500/50" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Batas Minimal</label>
+                  <input type="number" required min="1" value={addForm.batasMin} onChange={(e) => setAddForm({...addForm, batasMin: e.target.value})} placeholder="0" className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-500/50" />
+                </div>
+              </div>
+              <div className="pb-2">
+                <label className="block text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Stok Awal</label>
+                <input type="number" required min="0" value={addForm.stok} onChange={(e) => setAddForm({...addForm, stok: e.target.value})} placeholder="0" className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm font-bold text-amber-400 focus:outline-none focus:border-amber-500/50" />
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full mt-2 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-[0.98] text-white"
+                style={{ background: "linear-gradient(135deg, #8B4513, #C8883C)", boxShadow: "0 8px 24px rgba(139,69,19,0.3)" }}
+              >
+                Simpan Bahan Baku
+              </button>
+            </form>
           </div>
         </div>
       )}
