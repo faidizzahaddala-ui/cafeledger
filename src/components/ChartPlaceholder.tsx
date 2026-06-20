@@ -2,12 +2,26 @@
 
 import React from "react";
 
-const days = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
-
 // Dummy normalized bar heights (for visual effect)
-const barHeights = [55, 70, 45, 88, 65, 92, 78];
+const dataMap: Record<string, { days: string[]; heights: number[] }> = {
+  "7H": {
+    days: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
+    heights: [55, 70, 45, 88, 65, 92, 78],
+  },
+  "14H": {
+    days: ["1", "3", "5", "7", "9", "11", "13"],
+    heights: [45, 55, 40, 60, 50, 75, 80],
+  },
+  "30H": {
+    days: ["1", "5", "10", "15", "20", "25", "30"],
+    heights: [60, 40, 80, 55, 90, 70, 95],
+  },
+};
 
-export default function ChartPlaceholder() {
+export default function ChartPlaceholder({ period = "7H" }: { period?: string }) {
+  const chartData = dataMap[period] || dataMap["7H"];
+  const barHeights = chartData.heights;
+  const days = chartData.days;
   return (
     <div className="w-full h-full flex flex-col">
       {/* Chart area */}

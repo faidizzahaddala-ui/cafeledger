@@ -85,6 +85,7 @@ export default function DashboardPage() {
   const [seedProgress, setSeedProgress]     = useState(0);
   const [seedDone, setSeedDone]             = useState(false);
   const [seedError, setSeedError]           = useState<string | null>(null);
+  const [activePeriod, setActivePeriod]     = useState("7H");
 
   // ── Seeder Function ─────────────────────────────────────────────────────────
   const handleSeed = async () => {
@@ -381,8 +382,9 @@ export default function DashboardPage() {
                       <button
                         key={label}
                         id={`chart-period-${label.toLowerCase()}`}
+                        onClick={() => setActivePeriod(label)}
                         className={`px-2 md:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                          i === 0
+                          activePeriod === label
                             ? "bg-gradient-to-r from-amber-600/30 to-orange-600/20 text-amber-300 border border-amber-500/30"
                             : "text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-white/[0.03] border border-white/[0.06]"
                         }`}
@@ -395,7 +397,7 @@ export default function DashboardPage() {
 
                 {/* Chart Content */}
                 <div className="h-40 md:h-48">
-                  <ChartPlaceholder/>
+                  <ChartPlaceholder period={activePeriod} />
                 </div>
               </div>
 
