@@ -27,7 +27,7 @@ export default function ChartPlaceholder() {
         {/* Bars */}
         <div className="absolute bottom-8 left-12 right-0 flex items-end justify-around h-[calc(100%-2rem)]">
           {barHeights.map((height, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-1.5 group">
+            <div key={idx} className="flex flex-col items-center justify-end gap-1.5 group h-full">
               {/* Tooltip on hover */}
               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute -top-6 bg-[var(--bg-card)] border border-[var(--border)] rounded-md px-2 py-1 text-[10px] text-[var(--text-primary)] whitespace-nowrap pointer-events-none z-10">
                 Rp {(height * 150000).toLocaleString("id-ID")}
