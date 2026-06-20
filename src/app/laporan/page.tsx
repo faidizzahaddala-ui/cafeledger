@@ -98,7 +98,6 @@ function SkeletonRow({ cols }: { cols: number }) {
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export default function LaporanPage() {
   const { role } = useRole();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
