@@ -637,7 +637,8 @@ export default function PosPage() {
                       type="number"
                       value={amountTendered || ""}
                       onChange={(e) => setAmountTendered(Number(e.target.value))}
-                      className="w-full !pl-12 pr-4 py-3 bg-white/[0.02] border border-white/[0.1] rounded-xl text-lg font-bold focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.05] transition-all"
+                      className="w-full pr-4 py-3 bg-white/[0.02] border border-white/[0.1] rounded-xl text-lg font-bold focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.05] transition-all"
+                      style={{ paddingLeft: "3.5rem" }}
                     />
                   </div>
                 </div>
