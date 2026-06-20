@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [seedDone, setSeedDone]             = useState(false);
   const [seedError, setSeedError]           = useState<string | null>(null);
   const [activePeriod, setActivePeriod]     = useState("7H");
+  const [toastMsg, setToastMsg]             = useState<string | null>(null);
   const [omzet, setOmzet]                   = useState(48750000);
   const [beban, setBeban]                   = useState(31200000);
 
@@ -220,11 +221,14 @@ export default function DashboardPage() {
 
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Period Selector — hidden on xs */}
-            <div
-              className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-xs md:text-sm font-medium text-[var(--text-muted)] cursor-pointer"
+            <button
+              className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-xs md:text-sm font-medium text-[var(--text-muted)] cursor-pointer hover:bg-white/[0.08] transition-colors"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-light)" }}
               id="period-selector"
-              onClick={() => alert("Fitur filter bulan akan hadir di Fase 2!")}
+              onClick={() => {
+                setToastMsg("Fitur filter bulan akan hadir di Fase 2!");
+                setTimeout(() => setToastMsg(null), 3000);
+              }}
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -236,12 +240,15 @@ export default function DashboardPage() {
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
-            </div>
+            </button>
 
             {/* Notification Bell */}
             <button
               id="notification-btn"
-              onClick={() => alert("Tidak ada notifikasi baru saat ini.")}
+              onClick={() => {
+                setToastMsg("Tidak ada notifikasi baru saat ini.");
+                setTimeout(() => setToastMsg(null), 3000);
+              }}
               className="relative w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-light)" }}
               aria-label="Notifikasi"
@@ -256,7 +263,10 @@ export default function DashboardPage() {
             {/* Refresh Button */}
             <button
               id="refresh-btn"
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                setToastMsg("Memuat ulang data...");
+                setTimeout(() => window.location.reload(), 1000);
+              }}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-light)" }}
               aria-label="Refresh data"
@@ -401,7 +411,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   <div className="flex gap-1.5 md:gap-2 flex-wrap justify-end">
-                    {["7H", "14H", "30H"].map((label, i) => (
+                    {["7H", "14H", "30H"].map((label) => (
                       <button
                         key={label}
                         id={`chart-period-${label.toLowerCase()}`}
