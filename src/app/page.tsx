@@ -362,8 +362,13 @@ export default function DashboardPage() {
               </div>
               )}
 
+              {/* ── Transaksi Management (overflow-x-auto handled inside) ── */}
+              <div className="mb-2">
+                <TransaksiManagement/>
+              </div>
+
               {/* Section Label */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mt-4">
                 <div className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-orange-600 flex-shrink-0"/>
                 <h2 className="text-xs md:text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   Ringkasan Keuangan
@@ -375,15 +380,13 @@ export default function DashboardPage() {
               </div>
 
               {/* ── KPI Cards: 1 col mobile → 3 col sm+ ── */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4" id="kpi-cards-section">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-2" id="kpi-cards-section">
                 {kpiData
                   .filter((kpi) => role === "Owner" || kpi.title !== "Laba Bersih Sementara")
                   .map((kpi) => (
                     <KpiCard key={kpi.title} {...kpi}/>
                   ))}
               </div>
-              {/* ── Transaksi Management (overflow-x-auto handled inside) ── */}
-              <TransaksiManagement/>
               {/* ── Chart Section ── */}
               <div className="flex items-center gap-3 mt-4 mb-1">
                 <div className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-orange-600 flex-shrink-0"/>
