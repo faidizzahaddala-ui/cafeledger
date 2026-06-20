@@ -77,7 +77,7 @@ export default function DashboardPage() {
           <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
       ),
-      trend: { value: "Berdasarkan data asli", positive: true },
+      trend: { value: "Real-time", positive: true },
       accentColor: "gold" as const,
       animationDelay: "0.1s",
     },
@@ -91,7 +91,7 @@ export default function DashboardPage() {
           <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
       ),
-      trend: { value: "Berdasarkan data asli", positive: false },
+      trend: { value: "Real-time", positive: false },
       accentColor: "red" as const,
       animationDelay: "0.2s",
     },
@@ -105,7 +105,7 @@ export default function DashboardPage() {
           <polyline points="17 6 23 6 23 12"/>
         </svg>
       ),
-      trend: { value: "Berdasarkan data asli", positive: laba >= 0 },
+      trend: { value: "Real-time", positive: laba >= 0 },
       accentColor: "green" as const,
       animationDelay: "0.3s",
     },
