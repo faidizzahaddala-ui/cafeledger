@@ -1,60 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/utils/supabase";
+import { useRole, UserRole } from "@/context/RoleContext";
 
 export default function AuthPage() {
-  const [isLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const { setRole } = useRole();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDemoLogin = (selectedRole: UserRole) => {
     setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      if (isLogin) {
-        // Log in
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        // Successful login will automatically redirect via AuthContext
-      } else {
-        // Sign up
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName,
-            },
-          },
-        });
-        if (error) throw error;
-        
-        setSuccess("Pendaftaran berhasil! Silakan periksa kotak masuk email Anda untuk verifikasi.");
-        // Clear form
-        setEmail("");
-        setPassword("");
-        setFullName("");
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Terjadi kesalahan saat autentikasi.");
-      }
-    } finally {
-      setLoading(false);
-    }
+    setRole(selectedRole);
+    localStorage.setItem("demo-mode", "true");
+    // Force reload to let AuthContext pick up demo-mode
+    window.location.href = "/";
   };
 
   return (
@@ -76,7 +34,7 @@ export default function AuthPage() {
             CafeLedger
           </h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-1">
-            {isLogin ? "Masuk ke dashboard Yalla Coffee" : "Daftarkan akun staf baru Anda"}
+            Pilih peran untuk simulasi presentasi
           </p>
         </div>
 
@@ -98,61 +56,30 @@ export default function AuthPage() {
           </div>
         )}
 
-        <form onSubmit={handleAuth} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Nama Lengkap</label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Mawar Melati"
-                className="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.05] transition-all"
-                required={!isLogin}
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="nama@yallacoffee.com"
-              className="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.05] transition-all"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.05] transition-all"
-              required
-              minLength={6}
-            />
-          </div>
+        <div className="space-y-4">
+          <button
+            onClick={() => handleDemoLogin("Owner")}
+            className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-3 hover:-translate-y-0.5 active:scale-95 text-white bg-gradient-to-r from-amber-600 to-orange-600 shadow-lg shadow-orange-900/20"
+          >
+            <span className="text-xl">👑</span> Login sebagai Owner
+          </button>
+          
+          <button
+            onClick={() => handleDemoLogin("Kasir")}
+            className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-3 hover:-translate-y-0.5 active:scale-95 text-[var(--text-primary)] bg-white/[0.05] border border-white/[0.1] hover:bg-white/[0.08]"
+          >
+            <span className="text-xl">💵</span> Login sebagai Kasir
+          </button>
 
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 hover:-translate-y-0.5 active:scale-95 text-white"
-            style={{ background: "linear-gradient(135deg, #8B4513, #C8883C)", boxShadow: "0 8px 24px rgba(139,69,19,0.3)" }}
+            onClick={() => handleDemoLogin("Barista")}
+            className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-3 hover:-translate-y-0.5 active:scale-95 text-[var(--text-primary)] bg-white/[0.05] border border-white/[0.1] hover:bg-white/[0.08]"
           >
-            {loading ? (
-              <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Memproses...</>
-            ) : (
-              isLogin ? "Masuk" : "Daftar Akun"
-            )}
+            <span className="text-xl">☕</span> Login sebagai Barista
           </button>
-        </form>
+        </div>
 
-        <div className="mt-6 pt-6 border-t border-white/[0.08] text-center">
+        <div className="mt-8 pt-6 border-t border-white/[0.08] text-center">
           <p className="text-[10px] text-[var(--text-muted)] opacity-60">
             Aplikasi khusus internal Yalla Coffee.
             <br />Hubungi Administrator untuk pendaftaran akun.

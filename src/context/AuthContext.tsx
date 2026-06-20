@@ -24,6 +24,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session
     const initializeAuth = async () => {
       try {
+        const demoMode = localStorage.getItem("demo-mode");
+        if (demoMode === "true") {
+           setUser({ id: "demo-user", email: "demo@yallacoffee.com" } as User);
+           setLoading(false);
+           return;
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
@@ -39,6 +46,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        const demoMode = localStorage.getItem("demo-mode");
+        if (demoMode === "true") return;
+
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);

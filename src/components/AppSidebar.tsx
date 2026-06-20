@@ -266,6 +266,7 @@ function SidebarContent({
                   onClick={async () => {
                     const { supabase } = await import('@/utils/supabase');
                     await supabase.auth.signOut();
+                    localStorage.removeItem("demo-mode");
                     window.location.href = "/auth";
                   }}
                   className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-all text-[11px] font-bold tracking-wide"
