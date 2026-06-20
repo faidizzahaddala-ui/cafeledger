@@ -557,6 +557,16 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      
+      {/* ── Global Toast Message ── */}
+      {toastMsg && (
+        <div className="fixed top-4 right-4 z-50 animate-fade-up bg-black/80 backdrop-blur-md border border-white/10 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span className="text-sm font-medium text-white">{toastMsg}</span>
+        </div>
+      )}
     </div>
   );
 }
