@@ -1,7 +1,7 @@
 "use client";
 const secureRandom = () => { const arr = new Uint32Array(1); crypto.getRandomValues(arr); return arr[0] / 4294967296; };
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import KpiCard from "@/components/KpiCard";
 import StockAlerts from "@/components/StockAlerts";
@@ -10,52 +10,6 @@ import AppSidebar from "@/components/AppSidebar";
 import TransaksiManagement from "@/components/TransaksiManagement";
 import { insertTransaksi, type KategoriTransaksi } from "@/utils/supabase";
 import { useRole } from "@/context/RoleContext";
-
-// ── KPI Data ──────────────────────────────────────────────────────────────────
-const kpiData = [
-  {
-    title: "Total Omzet",
-    subtitle: "Bulan Juni 2026",
-    value: "Rp 48.750.000",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="1" x2="12" y2="23"/>
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-      </svg>
-    ),
-    trend: { value: "8.4% vs bln lalu", positive: true },
-    accentColor: "gold" as const,
-    animationDelay: "0.1s",
-  },
-  {
-    title: "Total Beban",
-    subtitle: "Biaya operasional",
-    value: "Rp 31.200.000",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-    ),
-    trend: { value: "2.1% vs bln lalu", positive: false },
-    accentColor: "red" as const,
-    animationDelay: "0.2s",
-  },
-  {
-    title: "Laba Bersih Sementara",
-    subtitle: "Estimasi bulan ini",
-    value: "Rp 17.550.000",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-        <polyline points="17 6 23 6 23 12"/>
-      </svg>
-    ),
-    trend: { value: "15.7% vs bln lalu", positive: true },
-    accentColor: "green" as const,
-    animationDelay: "0.3s",
-  },
-];
 
 // ── Page Component ─────────────────────────────────────────────────────────────
 // ── Seeder: Dummy Data Templates ──────────────────────────────────────────────
@@ -86,6 +40,75 @@ export default function DashboardPage() {
   const [seedDone, setSeedDone]             = useState(false);
   const [seedError, setSeedError]           = useState<string | null>(null);
   const [activePeriod, setActivePeriod]     = useState("7H");
+  const [omzet, setOmzet]                   = useState(48750000);
+  const [beban, setBeban]                   = useState(31200000);
+
+  useEffect(() => {
+    const fetchKpi = async () => {
+      const { supabase } = await import("@/utils/supabase");
+      const { data } = await supabase.from("Transaksi").select("type, amount");
+      if (data) {
+        let totalOmzet = 0;
+        let totalBeban = 0;
+        data.forEach((t) => {
+          if (t.type === "Pemasukan") totalOmzet += t.amount;
+          else if (t.type === "Pengeluaran") totalBeban += t.amount;
+        });
+        if (totalOmzet > 0 || totalBeban > 0) {
+          setOmzet(totalOmzet);
+          setBeban(totalBeban);
+        }
+      }
+    };
+    fetchKpi();
+  }, [seedDone]); // re-fetch if seeding is done
+
+  const laba = omzet - beban;
+
+  const kpiData = [
+    {
+      title: "Total Omzet",
+      subtitle: "Bulan ini",
+      value: `Rp ${omzet.toLocaleString("id-ID")}`,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      ),
+      trend: { value: "Berdasarkan data asli", positive: true },
+      accentColor: "gold" as const,
+      animationDelay: "0.1s",
+    },
+    {
+      title: "Total Beban",
+      subtitle: "Biaya operasional",
+      value: `Rp ${beban.toLocaleString("id-ID")}`,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+      ),
+      trend: { value: "Berdasarkan data asli", positive: false },
+      accentColor: "red" as const,
+      animationDelay: "0.2s",
+    },
+    {
+      title: "Laba Bersih Sementara",
+      subtitle: "Estimasi bulan ini",
+      value: `Rp ${laba.toLocaleString("id-ID")}`,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          <polyline points="17 6 23 6 23 12"/>
+        </svg>
+      ),
+      trend: { value: "Berdasarkan data asli", positive: laba >= 0 },
+      accentColor: "green" as const,
+      animationDelay: "0.3s",
+    },
+  ];
 
   // ── Seeder Function ─────────────────────────────────────────────────────────
   const handleSeed = async () => {
@@ -348,11 +371,8 @@ export default function DashboardPage() {
                   ))}
               </div>
 
-              {/* ── Transaksi Management (overflow-x-auto handled inside) ── */}
-              <TransaksiManagement/>
-
               {/* ── Chart Section ── */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mt-2 mb-1">
                 <div className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-orange-600 flex-shrink-0"/>
                 <h2 className="text-xs md:text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   Tren Transaksi 7 Hari Terakhir
@@ -401,6 +421,9 @@ export default function DashboardPage() {
                   <ChartPlaceholder period={activePeriod} />
                 </div>
               </div>
+
+              {/* ── Transaksi Management (overflow-x-auto handled inside) ── */}
+              <TransaksiManagement/>
 
               {/* ── Quick Stats: 1 col mobile → 3 col sm+ ── */}
               <div
