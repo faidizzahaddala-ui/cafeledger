@@ -382,9 +382,10 @@ export default function DashboardPage() {
                     <KpiCard key={kpi.title} {...kpi}/>
                   ))}
               </div>
-
+              {/* ── Transaksi Management (overflow-x-auto handled inside) ── */}
+              <TransaksiManagement/>
               {/* ── Chart Section ── */}
-              <div className="flex items-center gap-3 mt-2 mb-1">
+              <div className="flex items-center gap-3 mt-4 mb-1">
                 <div className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-orange-600 flex-shrink-0"/>
                 <h2 className="text-xs md:text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   Tren Transaksi 7 Hari Terakhir
@@ -433,9 +434,6 @@ export default function DashboardPage() {
                   <ChartPlaceholder period={activePeriod} />
                 </div>
               </div>
-
-              {/* ── Transaksi Management (overflow-x-auto handled inside) ── */}
-              <TransaksiManagement/>
 
               {/* ── Quick Stats: 1 col mobile → 3 col sm+ ── */}
               <div
