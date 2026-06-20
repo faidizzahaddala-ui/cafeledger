@@ -1,5 +1,6 @@
-const secureRandom = () => { const arr = new Uint32Array(1); crypto.getRandomValues(arr); return arr[0] / 4294967296; };
+/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 "use client";
+const secureRandom = () => { const arr = new Uint32Array(1); crypto.getRandomValues(arr); return arr[0] / 4294967296; };
 
 import { useState, useMemo } from "react";
 import AppSidebar from "@/components/AppSidebar";

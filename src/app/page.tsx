@@ -1,5 +1,5 @@
-const secureRandom = () => { const arr = new Uint32Array(1); crypto.getRandomValues(arr); return arr[0] / 4294967296; };
 "use client";
+const secureRandom = () => { const arr = new Uint32Array(1); crypto.getRandomValues(arr); return arr[0] / 4294967296; };
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
