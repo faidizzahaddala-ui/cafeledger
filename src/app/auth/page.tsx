@@ -153,18 +153,9 @@ export default function AuthPage() {
         </form>
 
         <div className="mt-6 pt-6 border-t border-white/[0.08] text-center">
-          <p className="text-[12px] text-[var(--text-muted)]">
-            {isLogin ? "Belum punya akun? " : "Sudah punya akun? "}
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError(null);
-                setSuccess(null);
-              }}
-              className="text-amber-400 font-semibold hover:underline"
-            >
-              {isLogin ? "Daftar di sini" : "Masuk di sini"}
-            </button>
+          <p className="text-[10px] text-[var(--text-muted)] opacity-60">
+            Aplikasi khusus internal Yalla Coffee.
+            <br />Hubungi Administrator untuk pendaftaran akun.
           </p>
         </div>
       </div>

@@ -231,6 +231,7 @@ export default function DashboardPage() {
             {/* Refresh Button */}
             <button
               id="refresh-btn"
+              onClick={() => window.location.reload()}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-light)" }}
               aria-label="Refresh data"
@@ -477,6 +478,7 @@ export default function DashboardPage() {
               {/* Restock Button */}
               <button
                 id="restock-action-btn"
+                onClick={() => alert("Fitur Integrasi Supplier akan hadir di Fase 2!")}
                 className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 animate-fade-in"
                 style={{
                   background: "linear-gradient(135deg, #8B4513, #C8883C)",

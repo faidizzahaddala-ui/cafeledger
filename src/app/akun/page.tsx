@@ -47,12 +47,12 @@ export default function AkunPage() {
                 </svg>
                 <input type="text" placeholder="Cari nama karyawan..." className="w-full pl-9 bg-white/5 border border-white/10 rounded-xl py-2.5 text-sm focus:outline-none focus:border-amber-500/50" />
               </div>
-              <button className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2 transition-all hover:bg-white/[0.05]" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-light)" }}>
+              {/* <button className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2 transition-all hover:bg-white/[0.05]" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-light)" }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
                 Tambah Staf
-              </button>
+              </button> */}
             </div>
 
             {/* Table Panel */}
