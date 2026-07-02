@@ -1,14 +1,10 @@
 "use client";
-
-import { useState } from "react";
 import { useRole, UserRole } from "@/context/RoleContext";
 
 export default function AuthPage() {
   const { setRole } = useRole();
-  const [loading, setLoading] = useState(false);
 
   const handleDemoLogin = (selectedRole: UserRole) => {
-    setLoading(true);
     setRole(selectedRole);
     localStorage.setItem("demo-mode", "true");
     // Force reload to let AuthContext pick up demo-mode
@@ -37,24 +33,6 @@ export default function AuthPage() {
             Pilih peran untuk simulasi presentasi
           </p>
         </div>
-
-        {error && (
-          <div className="mb-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3 animate-fade-in">
-            <svg className="flex-shrink-0 mt-0.5 text-red-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <p className="text-[12px] text-red-300">{error}</p>
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-6 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3 animate-fade-in">
-            <svg className="flex-shrink-0 mt-0.5 text-emerald-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-            <p className="text-[12px] text-emerald-300">{success}</p>
-          </div>
-        )}
 
         <div className="space-y-4">
           <button
