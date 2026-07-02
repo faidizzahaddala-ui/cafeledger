@@ -21,43 +21,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Get initial session
-    const initializeAuth = async () => {
-      try {
-        const demoMode = localStorage.getItem("demo-mode");
-        if (demoMode === "true") {
-           setUser({ id: "demo-user", email: "demo@yallacoffee.com" } as User);
-           setLoading(false);
-           return;
-        }
-
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
-      } catch (error) {
-        console.error("Error getting session:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        const demoMode = localStorage.getItem("demo-mode");
-        if (demoMode === "true") return;
-
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    // Automatically set a dummy user to bypass login completely
+    setUser({ id: "bypassed-user", email: "owner@yallacoffee.com" } as User);
+    setSession({
+      access_token: "dummy",
+      refresh_token: "dummy",
+      expires_in: 3600,
+      token_type: "bearer",
+      user: { id: "bypassed-user", email: "owner@yallacoffee.com" } as User
+    } as Session);
+    setLoading(false);
   }, []);
 
   // Route Protection
